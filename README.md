@@ -2,7 +2,7 @@
 
 Kaya is a short, portfolio project, turned full application. It was made to monitor system resources, docker images, and processes. With eye-appealing graphs and panes you can see exactly how much strain your server is under!
 
-![[screenshot.png]]
+![Kaya Dashboard Screenshot](screenshot.png)
 
 # ∿ Requirements
 
