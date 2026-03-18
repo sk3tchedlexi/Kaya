@@ -358,8 +358,8 @@
     </div>
 
     <script>
-      const API = "http://localhost:9783/api/metrics";
-      const BASE = "http://localhost:9783";
+      const BASE = window.location.origin;
+      const API = BASE + "/api/metrics";
       const HIST = 40;
       const makeH = () => Array(HIST).fill(null);
 
