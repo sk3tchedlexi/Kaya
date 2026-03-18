@@ -16,6 +16,21 @@
     <div class="bg"></div>
     <div class="bg-overlay"></div>
 
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal glass">
+        <div class="modal-title" id="modal-title">—</div>
+        <div class="modal-body" id="modal-body">—</div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="closeModal()">
+            Cancel
+          </button>
+          <button class="modal-btn confirm-btn" id="modal-confirm">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="dashboard">
       <div class="glass header">
         <div class="header-left">
@@ -32,6 +47,21 @@
             <div>
               <div class="uptime-label">Last update</div>
               <div class="uptime-val" id="time-display">—</div>
+            </div>
+            <div class="header-divider"></div>
+            <div class="header-actions">
+              <button
+                class="action-btn restart-btn"
+                onclick="confirmAction('restart')"
+              >
+                Restart
+              </button>
+              <button
+                class="action-btn shutdown-btn"
+                onclick="confirmAction('shutdown')"
+              >
+                Shutdown
+              </button>
             </div>
           </div>
         </div>
@@ -163,6 +193,7 @@
 
     <script>
       const API = "http://192.168.1.74:9783/api/metrics";
+      const BASE = "http://192.168.1.74:9783";
       const HIST = 40;
       const makeH = () => Array(HIST).fill(null);
 
@@ -353,6 +384,36 @@
         document.getElementById("uptime-display").textContent = fmtUptime(
           d.uptime_seconds,
         );
+      }
+
+      function confirmAction(action) {
+        const isShutdown = action === "shutdown";
+        document.getElementById("modal-title").textContent = isShutdown
+          ? "Shut down server?"
+          : "Restart server?";
+        document.getElementById("modal-body").textContent = isShutdown
+          ? "The server will power off. You will need physical access to turn it back on."
+          : "The server will reboot. The dashboard will reconnect automatically.";
+        const btn = document.getElementById("modal-confirm");
+        btn.textContent = isShutdown ? "Shut down" : "Restart";
+        btn.className =
+          "modal-btn confirm-btn " +
+          (isShutdown ? "shutdown-confirm" : "restart-confirm");
+        btn.onclick = () => executeAction(action);
+        document.getElementById("modal-overlay").classList.add("visible");
+      }
+
+      function closeModal() {
+        document.getElementById("modal-overlay").classList.remove("visible");
+      }
+
+      async function executeAction(action) {
+        closeModal();
+        try {
+          await fetch(BASE + "/api/" + action, { method: "POST" });
+        } catch {
+          // Server going down will cause a fetch error — expected
+        }
       }
 
       async function tick() {
