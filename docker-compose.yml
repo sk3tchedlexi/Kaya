@@ -27,4 +27,4 @@ services:
       - "com.casaos.port=9783"
       - "com.casaos.scheme=http"
       - "com.casaos.index=/"
-      - "com.casaos.icon=https://raw.githubusercontent.com/sk3tchedlexi/Kaya/main/Frontend/assets/brand/kaya-icon.svg"
+      - "com.casaos.icon=https://raw.githubusercontent.com/sk3tchedlexi/Kaya/main/Frontend/assets/brand/kaya-icon.png"
