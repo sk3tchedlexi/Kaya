@@ -9,11 +9,11 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY backend/requirements.txt .
+COPY Backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY backend/ ./backend/
-COPY frontend/ ./frontend/
+COPY Backend/ ./backend/
+COPY Frontend/ ./frontend/
 
 EXPOSE 9783
 
