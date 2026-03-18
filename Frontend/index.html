@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kaya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="dashboard">
+      <div class="glass header">
+        <div class="header-left">
+          <div class="status-dot offline" id="status-dot"></div>
+          <img src="assets/brand/kaya-logo-light.svg" alt="Kaya" class="logo" />
+        </div>
+        <div class="header-right">
+          <div class="header-meta">
+            <div>
+              <div class="uptime-label">Uptime</div>
+              <div class="uptime-val" id="uptime-display">—</div>
+            </div>
+            <div class="header-divider"></div>
+            <div>
+              <div class="uptime-label">Last update</div>
+              <div class="uptime-val" id="time-display">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="glass stat-card cpu">
+          <div>
+            <div class="stat-label">CPU Usage</div>
+            <div class="stat-val" id="cpu-val">—</div>
+            <div class="stat-sub" id="cpu-sub">—</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="cpu-bar" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="glass stat-card gpu">
+          <div>
+            <div class="stat-label">GPU Usage</div>
+            <div class="stat-val" id="gpu-val">—</div>
+            <div class="stat-sub" id="gpu-sub">—</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="gpu-bar" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="glass stat-card ram">
+          <div>
+            <div class="stat-label">RAM Usage</div>
+            <div class="stat-val" id="ram-val">—</div>
+            <div class="stat-sub" id="ram-sub">—</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="ram-bar" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="glass stat-card disk">
+          <div>
+            <div class="stat-label">Disk Usage</div>
+            <div class="stat-val" id="disk-val">—</div>
+            <div class="stat-sub" id="disk-sub">—</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="disk-bar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="glass chart-card">
+          <div class="chart-header">
+            <span class="chart-title">CPU history</span>
+            <span class="chart-cur" id="cpu-cur" style="color: #2563eb">—</span>
+          </div>
+          <div class="chart-wrap"><canvas id="cpu-chart"></canvas></div>
+        </div>
+        <div class="glass chart-card">
+          <div class="chart-header">
+            <span class="chart-title">GPU history</span>
+            <span class="chart-cur" id="gpu-cur" style="color: #7c3aed">—</span>
+          </div>
+          <div class="chart-wrap"><canvas id="gpu-chart"></canvas></div>
+        </div>
+        <div class="glass chart-card">
+          <div class="chart-header">
+            <span class="chart-title">RAM history</span>
+            <span class="chart-cur" id="ram-cur" style="color: #059669">—</span>
+          </div>
+          <div class="chart-wrap"><canvas id="ram-chart"></canvas></div>
+        </div>
+        <div class="glass chart-card">
+          <div class="chart-header">
+            <span class="chart-title">Disk I/O (MB/s)</span>
+            <span class="chart-cur" id="disk-cur" style="color: #d97706"
+              >—</span
+            >
+          </div>
+          <div class="chart-wrap"><canvas id="disk-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="glass temp-card">
+          <div class="temp-label">CPU Temp</div>
+          <div class="temp-val good" id="cpu-temp">—</div>
+          <div class="temp-bar-track">
+            <div
+              class="temp-bar-fill good"
+              id="cpu-temp-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div class="glass temp-card">
+          <div class="temp-label">GPU Temp</div>
+          <div class="temp-val good" id="gpu-temp">—</div>
+          <div class="temp-bar-track">
+            <div
+              class="temp-bar-fill good"
+              id="gpu-temp-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div class="glass temp-card">
+          <div class="temp-label">NVMe Temp</div>
+          <div class="temp-val good" id="nvme-temp">—</div>
+          <div class="temp-bar-track">
+            <div
+              class="temp-bar-fill good"
+              id="nvme-temp-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div class="glass temp-card">
+          <div class="temp-label">Motherboard</div>
+          <div class="temp-val good" id="mb-temp">—</div>
+          <div class="temp-bar-track">
+            <div
+              class="temp-bar-fill good"
+              id="mb-temp-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API = "http://192.168.1.74:9783/api/metrics";
+      const HIST = 40;
+      const makeH = () => Array(HIST).fill(null);
+
+      let cpuH = makeH(),
+        gpuH = makeH(),
+        ramH = makeH(),
+        ioH = makeH();
+
+      const chartOpts = (color, maxY, sfx) => ({
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 350 },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { display: false },
+          y: {
+            display: true,
+            min: 0,
+            max: maxY,
+            grid: { color: "rgba(28,24,48,0.07)", drawBorder: false },
+            ticks: {
+              color: "rgba(28,24,48,0.3)",
+              font: { family: "JetBrains Mono", size: 8 },
+              maxTicksLimit: 3,
+              callback: (v) => v + sfx,
+            },
+          },
+        },
+        elements: {
+          point: { radius: 0 },
+          line: { tension: 0.4, borderWidth: 1.5 },
+        },
+      });
+
+      const mkChart = (id, color, maxY, sfx) =>
+        new Chart(document.getElementById(id), {
+          type: "line",
+          data: {
+            labels: Array(HIST).fill(""),
+            datasets: [
+              {
+                data: Array(HIST).fill(null),
+                borderColor: color,
+                backgroundColor: color + "22",
+                fill: true,
+                spanGaps: false,
+              },
+            ],
+          },
+          options: chartOpts(color, maxY, sfx),
+        });
+
+      const cpuChart = mkChart("cpu-chart", "#2563eb", 100, "%");
+      const gpuChart = mkChart("gpu-chart", "#7c3aed", 100, "%");
+      const ramChart = mkChart("ram-chart", "#059669", 100, "%");
+      const diskChart = mkChart("disk-chart", "#d97706", 250, "");
+
+      function clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, v));
+      }
+
+      function pushChart(chart, hist, val) {
+        hist.shift();
+        hist.push(val);
+        chart.data.datasets[0].data = [...hist];
+        chart.update("none");
+      }
+
+      function setTemp(elId, barId, val, warn, danger, max) {
+        const el = document.getElementById(elId);
+        const bar = document.getElementById(barId);
+        if (val === null || val === undefined) {
+          el.textContent = "—";
+          el.className = "temp-val good";
+          bar.style.width = "0%";
+          bar.className = "temp-bar-fill good";
+          return;
+        }
+        const cls = val >= danger ? "danger" : val >= warn ? "warn" : "good";
+        el.textContent = val + "°C";
+        el.className = "temp-val " + cls;
+        bar.style.width = clamp((val / max) * 100, 0, 100) + "%";
+        bar.className = "temp-bar-fill " + cls;
+      }
+
+      function fmtUptime(secs) {
+        if (!secs && secs !== 0) return "—";
+        const d = Math.floor(secs / 86400);
+        const h = Math.floor((secs % 86400) / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        return (
+          d +
+          "d " +
+          String(h).padStart(2, "0") +
+          "h " +
+          String(m).padStart(2, "0") +
+          "m"
+        );
+      }
+
+      function clearDisplay() {
+        document.getElementById("status-dot").className = "status-dot offline";
+        [
+          "cpu-val",
+          "gpu-val",
+          "ram-val",
+          "disk-val",
+          "cpu-sub",
+          "gpu-sub",
+          "ram-sub",
+          "disk-sub",
+          "cpu-cur",
+          "gpu-cur",
+          "ram-cur",
+          "disk-cur",
+          "uptime-display",
+        ].forEach((id) => {
+          document.getElementById(id).textContent = "—";
+        });
+        ["cpu-bar", "gpu-bar", "ram-bar", "disk-bar"].forEach((id) => {
+          document.getElementById(id).style.width = "0%";
+        });
+        setTemp("cpu-temp", "cpu-temp-bar", null, 0, 0, 100);
+        setTemp("gpu-temp", "gpu-temp-bar", null, 0, 0, 100);
+        setTemp("nvme-temp", "nvme-temp-bar", null, 0, 0, 80);
+        setTemp("mb-temp", "mb-temp-bar", null, 0, 0, 80);
+        pushChart(cpuChart, cpuH, null);
+        pushChart(gpuChart, gpuH, null);
+        pushChart(ramChart, ramH, null);
+        pushChart(diskChart, ioH, null);
+      }
+
+      function applyMetrics(d) {
+        document.getElementById("status-dot").className = "status-dot online";
+
+        const cpu = Math.round(d.cpu.percent);
+        document.getElementById("cpu-val").textContent = cpu + "%";
+        document.getElementById("cpu-bar").style.width = cpu + "%";
+        document.getElementById("cpu-sub").textContent =
+          d.cpu.cores + " cores — " + d.cpu.model;
+        document.getElementById("cpu-cur").textContent = cpu + "%";
+        pushChart(cpuChart, cpuH, cpu);
+
+        if (d.gpu) {
+          const gpu = Math.round(d.gpu.percent);
+          document.getElementById("gpu-val").textContent = gpu + "%";
+          document.getElementById("gpu-bar").style.width = gpu + "%";
+          document.getElementById("gpu-sub").textContent =
+            "VRAM: " +
+            d.gpu.vram_used_gb.toFixed(1) +
+            " / " +
+            d.gpu.vram_total_gb.toFixed(1) +
+            " GB";
+          document.getElementById("gpu-cur").textContent = gpu + "%";
+          pushChart(gpuChart, gpuH, gpu);
+        } else {
+          document.getElementById("gpu-val").textContent = "N/A";
+          document.getElementById("gpu-sub").textContent = "No NVIDIA GPU";
+          document.getElementById("gpu-cur").textContent = "—";
+          pushChart(gpuChart, gpuH, null);
+        }
+
+        const ram = Math.round(d.ram.percent);
+        document.getElementById("ram-val").textContent = ram + "%";
+        document.getElementById("ram-bar").style.width = ram + "%";
+        document.getElementById("ram-sub").textContent =
+          d.ram.used_gb.toFixed(1) + " / " + d.ram.total_gb.toFixed(1) + " GB";
+        document.getElementById("ram-cur").textContent = ram + "%";
+        pushChart(ramChart, ramH, ram);
+
+        const disk = Math.round(d.disk.percent);
+        document.getElementById("disk-val").textContent = disk + "%";
+        document.getElementById("disk-bar").style.width = disk + "%";
+        document.getElementById("disk-sub").textContent =
+          d.disk.used_tb.toFixed(2) +
+          " / " +
+          d.disk.total_tb.toFixed(2) +
+          " TB";
+        const io = Math.round(d.disk.read_mbps + d.disk.write_mbps);
+        document.getElementById("disk-cur").textContent = io + " MB/s";
+        pushChart(diskChart, ioH, io);
+
+        setTemp("cpu-temp", "cpu-temp-bar", d.temps.cpu_c, 70, 85, 100);
+        setTemp("gpu-temp", "gpu-temp-bar", d.temps.gpu_c, 75, 90, 100);
+        setTemp("nvme-temp", "nvme-temp-bar", d.temps.nvme_c, 55, 70, 80);
+        setTemp("mb-temp", "mb-temp-bar", d.temps.motherboard_c, 55, 70, 80);
+
+        document.getElementById("uptime-display").textContent = fmtUptime(
+          d.uptime_seconds,
+        );
+      }
+
+      async function tick() {
+        document.getElementById("time-display").textContent =
+          new Date().toLocaleTimeString();
+        try {
+          const res = await fetch(API);
+          if (!res.ok) throw new Error();
+          applyMetrics(await res.json());
+        } catch {
+          clearDisplay();
+        }
+      }
+
+      tick();
+      setInterval(tick, 10000);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="56" viewBox="0 0 220 56">
+  <!-- Kaya — Signal wordmark, light variant -->
+  <!-- Wave mark -->
+  <polyline
+    points="2,28 20,28 32,9 44,47 56,16 66,38 76,28 94,28"
+    fill="none"
+    stroke="#2563eb"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Wordmark -->
+  <text
+    x="108" y="36"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-weight="300"
+    font-size="28"
+    letter-spacing="4"
+    fill="#1e1830"
+  >KAYA</text>
+</svg>

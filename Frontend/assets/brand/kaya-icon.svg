@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Kaya — Icon mark (wave only), for favicon / app icon use -->
+  <rect width="512" height="512" rx="112" fill="#2563eb"/>
+  <polyline
+    points="40,256 136,256 192,104 272,408 336,160 400,320 464,256 472,256"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="36"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
