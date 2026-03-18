@@ -14,6 +14,7 @@ services:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidia-uvm:/dev/nvidia-uvm
       - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+      - /dev/nvidia-modeset:/dev/nvidia-modeset
     privileged: true
     pid: host
     network_mode: host
