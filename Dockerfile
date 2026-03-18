@@ -17,4 +17,5 @@ COPY Frontend/ ./frontend/
 
 EXPOSE 9783
 
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "9783"]
+WORKDIR /app/backend
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9783"]
