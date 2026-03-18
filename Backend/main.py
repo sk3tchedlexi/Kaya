@@ -23,13 +23,13 @@ def get_metrics():
 
 @app.post("/api/shutdown")
 def shutdown():
-    subprocess.Popen(["sudo", "shutdown", "-h", "now"])
+    subprocess.Popen(["nsenter", "-t", "1", "-m", "-u", "-i", "-n", "-p", "--", "shutdown", "-h", "now"])
     return {"status": "shutting down"}
 
 
 @app.post("/api/restart")
 def restart():
-    subprocess.Popen(["sudo", "shutdown", "-r", "now"])
+    subprocess.Popen(["nsenter", "-t", "1", "-m", "-u", "-i", "-n", "-p", "--", "shutdown", "-r", "now"])
     return {"status": "restarting"}
 
 

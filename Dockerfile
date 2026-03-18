@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     nvme-cli \
     docker.io \
     sudo \
+    util-linux \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
