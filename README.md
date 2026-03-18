@@ -1,150 +1,38 @@
 # ∿ Kaya
 
-> A minimal, self-hosted system dashboard for your home server.
+Kaya is a short, portfolio project, turned full application. It was made to monitor system resources, docker images, and processes. With eye-appealing graphs and panes you can see exactly how much strain your server is under!
 
 ![Kaya Dashboard Screenshot](screenshot.png)
 
-Kaya gives you a beautiful at-a-glance view of your machine's CPU, GPU, RAM, disk usage, and temperatures — live, in your browser, with no cloud dependency and no telemetry.
+# ∿ Requirements
 
----
+- Ubuntu (or compatible Linux) host
+- Docker + Docker Compose **or** CasaOS
+- NVIDIDA GPU (Optional, if present; NVIDIA driver 535+ must be installed before deploying)
+- ``kernel.sysrq`` must be enabled for shutdown/restart buttons to work (see "Enabling Shutdown/Restart")
 
-## Features
+# ∿ Installation
 
-- **Live metrics** — CPU, GPU, RAM, and disk usage updated every 10 seconds
-- **History graphs** — rolling 40-point Chart.js sparklines for each metric
-- **Temperature monitoring** — CPU, GPU, NVMe, and motherboard temps with colour-coded warnings
-- **Disk I/O** — real-time read/write throughput in MB/s
-- **Uptime tracking** — formatted days/hours/minutes display
-- **Server controls** — restart and shutdown buttons with confirmation modal
-- **Glassmorphism UI** — frosted glass cards over a custom wallpaper background
-- **Offline detection** — status dot turns red and metrics clear when the backend is unreachable
-- **Zero telemetry** — runs entirely on your local network, nothing leaves your machine
+To install **Kaya** via CasaOS, simply open the App Store, navigate to the "Custom Install" menu, select "Import" in the top right, and paste the contents of the docker-compose.yml inside the text field, or upload it directly.
 
----
+To install **Kaya** through Docker Compose, first Clone the repo, then run ``docker compose up -d`` and then access the Dashboard at ``http://your-server-ip:9783``
 
-## Stack
+# ∿ Enabling Shutdown/Restart
 
-| Layer    | Technology                        |
-|----------|-----------------------------------|
-| Backend  | Python · FastAPI · psutil · pynvml |
-| Frontend | HTML · CSS · JavaScript · Chart.js |
-| Fonts    | Nunito · JetBrains Mono (Google Fonts) |
+- Run ``echo 1 | sudo tee /proc/sys/kernel/sysrq`` on the host
+- To make permanent: ``echo "kernel.sysrq = 1" | sudo tee -a /etc/sysctl.conf``
 
----
+# ∿ GPU support
 
-## Project Structure
+- Requires NVIDIA driver installed on the host
+- Device nodes ``/dev/nvidia*`` must exist before deploying the container
+- pynvml reads GPU stats via mounted host libraries
 
-```
-Kaya/
-├── Backend/
-│   ├── main.py          # FastAPI app with /api/metrics, /api/restart, /api/shutdown
-│   ├── metrics.py       # psutil + NVML data collection
-│   └── requirements.txt
-├── Frontend/
-│   ├── index.html       # Single-file dashboard
-│   ├── style.css        # Glassmorphism UI styles
-│   └── assets/
-│       ├── brand/       # Logo and icon SVGs
-│       └── wallpaper.jpg
-├── LICENSE
-└── README.md
-```
+# ∿ Features
 
----
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.10+
-- An NVIDIA GPU is optional — the dashboard gracefully handles systems without one
-
-### Installation
-
-**1. Clone the repository**
-```bash
-git clone https://github.com/sk3tchedlexi/Kaya.git
-cd Kaya
-```
-
-**2. Install Python dependencies**
-```bash
-cd Backend
-pip install -r requirements.txt
-```
-
-**3. Start the backend**
-```bash
-uvicorn main:app --host 0.0.0.0 --port 9783
-```
-
-**4. Open the frontend**
-
-Open `Frontend/index.html` directly in your browser, or serve it with any static file server. Make sure the `API` variable in `index.html` points to your server's IP and port.
-
-```js
-const API = "http://<YOUR_SERVER_IP>:9783/api/metrics";
-const BASE = "http://<YOUR_SERVER_IP>:9783";
-```
-
----
-
-## Running as a Service (Linux)
-
-To keep Kaya running in the background on boot, create a systemd service:
-
-```bash
-sudo nano /etc/systemd/system/kaya.service
-```
-
-```ini
-[Unit]
-Description=Kaya Dashboard Backend
-After=network.target
-
-[Service]
-ExecStart=/usr/bin/uvicorn main:app --host 0.0.0.0 --port 9783
-WorkingDirectory=/path/to/Kaya/Backend
-Restart=always
-User=your_username
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl enable kaya
-sudo systemctl start kaya
-```
-
----
-
-## Shutdown & Restart
-
-The dashboard includes Restart and Shutdown buttons that call `sudo shutdown` on the host machine. For these to work, your service user needs passwordless sudo for the shutdown command:
-
-```bash
-sudo visudo
-```
-Add the following line:
-```
-your_username ALL=(ALL) NOPASSWD: /sbin/shutdown
-```
-
----
-
-## Status
-
-🚧 **Early development** — the project is actively being built. Contributions and feedback are welcome.
-
-Planned features:
-- Network interface monitoring (upload/download speeds)
-- Running process viewer
-- Multi-server support
-- Docker container status
-
----
-
-## License
-
-MIT © [sk3tchedlexi](https://github.com/sk3tchedlexi)
+- CPU, GPU, RAM, Disk usage with history charts
+- Temperature monitoring (CPU, GPU, NVMe, Motherboard)
+- Docker container list
+- Process viewer (top CPU / top RAM)
+- Shutdown and restart buttons
+- Settings: refresh interval, light/dark theme, custom wallpaper
