@@ -9,13 +9,16 @@
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
-    <div class="bg"></div>
+  <body class="theme-light">
+    <div class="bg" id="bg"></div>
     <div class="bg-overlay"></div>
+    <div id="floating-tooltip"></div>
 
+    <!-- Confirm modal -->
     <div class="modal-overlay" id="modal-overlay">
       <div class="modal glass">
         <div class="modal-title" id="modal-title">—</div>
@@ -31,11 +34,88 @@
       </div>
     </div>
 
+    <!-- Settings panel -->
+    <div
+      class="settings-overlay"
+      id="settings-overlay"
+      onclick="closeSettings(event)"
+    >
+      <div class="settings-panel glass" id="settings-panel">
+        <div class="settings-title">Settings</div>
+
+        <div class="settings-section">
+          <div class="settings-label">Refresh interval</div>
+          <div class="interval-options">
+            <button class="interval-btn" data-ms="1000">1s</button>
+            <button class="interval-btn" data-ms="2000">2s</button>
+            <button class="interval-btn" data-ms="5000">5s</button>
+            <button class="interval-btn active" data-ms="10000">10s</button>
+            <button class="interval-btn" data-ms="30000">30s</button>
+            <button class="interval-btn" data-ms="60000">1m</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Theme</div>
+          <div class="theme-toggle">
+            <button
+              class="theme-btn active"
+              id="theme-light-btn"
+              onclick="setTheme('light')"
+            >
+              Light
+            </button>
+            <button
+              class="theme-btn"
+              id="theme-dark-btn"
+              onclick="setTheme('dark')"
+            >
+              Dark
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Wallpaper</div>
+          <label class="wallpaper-btn" for="wallpaper-input"
+            >Choose image</label
+          >
+          <input
+            type="file"
+            id="wallpaper-input"
+            accept="image/*"
+            style="display: none"
+            onchange="uploadWallpaper(event)"
+          />
+          <button class="wallpaper-reset-btn" onclick="resetWallpaper()">
+            Reset to default
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="dashboard">
+      <!-- Header -->
       <div class="glass header">
         <div class="header-left">
-          <div class="status-dot offline" id="status-dot"></div>
-          <img src="assets/brand/kaya-logo-light.svg" alt="Kaya" class="logo" />
+          <div class="tooltip-wrap" id="dot-wrap">
+            <div class="status-dot offline" id="status-dot"></div>
+          </div>
+          <img
+            src="assets/brand/kaya-logo-light.svg"
+            alt="Kaya"
+            class="logo"
+            id="header-logo"
+          />
+          <div class="tab-bar">
+            <button class="tab active" onclick="switchTab('overview')">
+              Overview
+            </button>
+            <button class="tab" onclick="switchTab('docker')">Docker</button>
+            <button class="tab" onclick="switchTab('processes')">
+              Processes
+            </button>
+          </div>
         </div>
         <div class="header-right">
           <div class="header-meta">
@@ -50,150 +130,236 @@
             </div>
             <div class="header-divider"></div>
             <div class="header-actions">
+              <div class="tooltip-wrap" id="restart-wrap">
+                <button
+                  class="action-btn restart-btn"
+                  onclick="confirmAction('restart')"
+                >
+                  Restart
+                </button>
+              </div>
+              <div class="tooltip-wrap" id="shutdown-wrap">
+                <button
+                  class="action-btn shutdown-btn"
+                  onclick="confirmAction('shutdown')"
+                >
+                  Shutdown
+                </button>
+              </div>
               <button
-                class="action-btn restart-btn"
-                onclick="confirmAction('restart')"
+                class="cog-btn"
+                id="cog-btn"
+                onclick="toggleSettings()"
+                aria-label="Settings"
               >
-                Restart
-              </button>
-              <button
-                class="action-btn shutdown-btn"
-                onclick="confirmAction('shutdown')"
-              >
-                Shutdown
+                <img
+                  src="assets/cog.svg"
+                  width="15"
+                  height="15"
+                  alt="Settings"
+                  class="cog-icon"
+                />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="stat-row">
-        <div class="glass stat-card cpu">
-          <div>
-            <div class="stat-label">CPU Usage</div>
-            <div class="stat-val" id="cpu-val">—</div>
-            <div class="stat-sub" id="cpu-sub">—</div>
+      <!-- Tab: Overview -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="stat-row">
+          <div class="glass stat-card cpu">
+            <div>
+              <div class="stat-label">CPU Usage</div>
+              <div class="stat-val" id="cpu-val">—</div>
+              <div class="stat-sub" id="cpu-sub">—</div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="cpu-bar" style="width: 0%"></div>
+            </div>
           </div>
-          <div class="bar-track">
-            <div class="bar-fill" id="cpu-bar" style="width: 0%"></div>
+          <div class="glass stat-card gpu">
+            <div>
+              <div class="stat-label">GPU Usage</div>
+              <div class="stat-val" id="gpu-val">—</div>
+              <div class="stat-sub" id="gpu-sub">—</div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="gpu-bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="glass stat-card ram">
+            <div>
+              <div class="stat-label">RAM Usage</div>
+              <div class="stat-val" id="ram-val">—</div>
+              <div class="stat-sub" id="ram-sub">—</div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="ram-bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="glass stat-card disk">
+            <div>
+              <div class="stat-label">Disk Usage</div>
+              <div class="stat-val" id="disk-val">—</div>
+              <div class="stat-sub" id="disk-sub">—</div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="disk-bar" style="width: 0%"></div>
+            </div>
           </div>
         </div>
-        <div class="glass stat-card gpu">
-          <div>
-            <div class="stat-label">GPU Usage</div>
-            <div class="stat-val" id="gpu-val">—</div>
-            <div class="stat-sub" id="gpu-sub">—</div>
+
+        <div class="chart-row">
+          <div class="glass chart-card">
+            <div class="chart-header">
+              <span class="chart-title">CPU history</span>
+              <span class="chart-cur" id="cpu-cur" style="color: #2563eb"
+                >—</span
+              >
+            </div>
+            <div class="chart-wrap"><canvas id="cpu-chart"></canvas></div>
           </div>
-          <div class="bar-track">
-            <div class="bar-fill" id="gpu-bar" style="width: 0%"></div>
+          <div class="glass chart-card">
+            <div class="chart-header">
+              <span class="chart-title">GPU history</span>
+              <span class="chart-cur" id="gpu-cur" style="color: #7c3aed"
+                >—</span
+              >
+            </div>
+            <div class="chart-wrap"><canvas id="gpu-chart"></canvas></div>
+          </div>
+          <div class="glass chart-card">
+            <div class="chart-header">
+              <span class="chart-title">RAM history</span>
+              <span class="chart-cur" id="ram-cur" style="color: #059669"
+                >—</span
+              >
+            </div>
+            <div class="chart-wrap"><canvas id="ram-chart"></canvas></div>
+          </div>
+          <div class="glass chart-card">
+            <div class="chart-header">
+              <span class="chart-title">Disk I/O (MB/s)</span>
+              <span class="chart-cur" id="disk-cur" style="color: #d97706"
+                >—</span
+              >
+            </div>
+            <div class="chart-wrap"><canvas id="disk-chart"></canvas></div>
           </div>
         </div>
-        <div class="glass stat-card ram">
-          <div>
-            <div class="stat-label">RAM Usage</div>
-            <div class="stat-val" id="ram-val">—</div>
-            <div class="stat-sub" id="ram-sub">—</div>
+
+        <div class="bottom-row">
+          <div class="glass temp-card">
+            <div class="temp-label">CPU Temp</div>
+            <div class="temp-val good" id="cpu-temp">—</div>
+            <div class="temp-bar-track">
+              <div
+                class="temp-bar-fill good"
+                id="cpu-temp-bar"
+                style="width: 0%"
+              ></div>
+            </div>
           </div>
-          <div class="bar-track">
-            <div class="bar-fill" id="ram-bar" style="width: 0%"></div>
+          <div class="glass temp-card">
+            <div class="temp-label">GPU Temp</div>
+            <div class="temp-val good" id="gpu-temp">—</div>
+            <div class="temp-bar-track">
+              <div
+                class="temp-bar-fill good"
+                id="gpu-temp-bar"
+                style="width: 0%"
+              ></div>
+            </div>
           </div>
-        </div>
-        <div class="glass stat-card disk">
-          <div>
-            <div class="stat-label">Disk Usage</div>
-            <div class="stat-val" id="disk-val">—</div>
-            <div class="stat-sub" id="disk-sub">—</div>
+          <div class="glass temp-card">
+            <div class="temp-label">NVMe Temp</div>
+            <div class="temp-val good" id="nvme-temp">—</div>
+            <div class="temp-bar-track">
+              <div
+                class="temp-bar-fill good"
+                id="nvme-temp-bar"
+                style="width: 0%"
+              ></div>
+            </div>
           </div>
-          <div class="bar-track">
-            <div class="bar-fill" id="disk-bar" style="width: 0%"></div>
+          <div class="glass temp-card">
+            <div class="temp-label">Motherboard</div>
+            <div class="temp-val good" id="mb-temp">—</div>
+            <div class="temp-bar-track">
+              <div
+                class="temp-bar-fill good"
+                id="mb-temp-bar"
+                style="width: 0%"
+              ></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="chart-row">
-        <div class="glass chart-card">
-          <div class="chart-header">
-            <span class="chart-title">CPU history</span>
-            <span class="chart-cur" id="cpu-cur" style="color: #2563eb">—</span>
-          </div>
-          <div class="chart-wrap"><canvas id="cpu-chart"></canvas></div>
+      <!-- Tab: Docker -->
+      <div class="tab-content" id="tab-docker">
+        <div class="glass panel-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Container</th>
+                <th>Image</th>
+                <th>Status</th>
+                <th>Running for</th>
+              </tr>
+            </thead>
+            <tbody id="docker-body">
+              <tr>
+                <td colspan="4" class="empty-row">—</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="glass chart-card">
-          <div class="chart-header">
-            <span class="chart-title">GPU history</span>
-            <span class="chart-cur" id="gpu-cur" style="color: #7c3aed">—</span>
-          </div>
-          <div class="chart-wrap"><canvas id="gpu-chart"></canvas></div>
-        </div>
-        <div class="glass chart-card">
-          <div class="chart-header">
-            <span class="chart-title">RAM history</span>
-            <span class="chart-cur" id="ram-cur" style="color: #059669">—</span>
-          </div>
-          <div class="chart-wrap"><canvas id="ram-chart"></canvas></div>
-        </div>
-        <div class="glass chart-card">
-          <div class="chart-header">
-            <span class="chart-title">Disk I/O (MB/s)</span>
-            <span class="chart-cur" id="disk-cur" style="color: #d97706"
-              >—</span
+      </div>
+
+      <!-- Tab: Processes -->
+      <div class="tab-content" id="tab-processes">
+        <div class="glass panel-card">
+          <div class="panel-toolbar">
+            <button
+              class="sort-btn active"
+              id="sort-cpu-btn"
+              onclick="setProcessSort('cpu')"
             >
+              Top CPU
+            </button>
+            <button
+              class="sort-btn"
+              id="sort-ram-btn"
+              onclick="setProcessSort('ram')"
+            >
+              Top RAM
+            </button>
           </div>
-          <div class="chart-wrap"><canvas id="disk-chart"></canvas></div>
-        </div>
-      </div>
-
-      <div class="bottom-row">
-        <div class="glass temp-card">
-          <div class="temp-label">CPU Temp</div>
-          <div class="temp-val good" id="cpu-temp">—</div>
-          <div class="temp-bar-track">
-            <div
-              class="temp-bar-fill good"
-              id="cpu-temp-bar"
-              style="width: 0%"
-            ></div>
-          </div>
-        </div>
-        <div class="glass temp-card">
-          <div class="temp-label">GPU Temp</div>
-          <div class="temp-val good" id="gpu-temp">—</div>
-          <div class="temp-bar-track">
-            <div
-              class="temp-bar-fill good"
-              id="gpu-temp-bar"
-              style="width: 0%"
-            ></div>
-          </div>
-        </div>
-        <div class="glass temp-card">
-          <div class="temp-label">NVMe Temp</div>
-          <div class="temp-val good" id="nvme-temp">—</div>
-          <div class="temp-bar-track">
-            <div
-              class="temp-bar-fill good"
-              id="nvme-temp-bar"
-              style="width: 0%"
-            ></div>
-          </div>
-        </div>
-        <div class="glass temp-card">
-          <div class="temp-label">Motherboard</div>
-          <div class="temp-val good" id="mb-temp">—</div>
-          <div class="temp-bar-track">
-            <div
-              class="temp-bar-fill good"
-              id="mb-temp-bar"
-              style="width: 0%"
-            ></div>
-          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>Name</th>
+                <th>CPU %</th>
+                <th>RAM</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="process-body">
+              <tr>
+                <td colspan="5" class="empty-row">—</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <script>
-      const API = "http://192.168.1.74:9783/api/metrics";
-      const BASE = "http://192.168.1.74:9783";
+      const API = "http://localhost:9783/api/metrics";
+      const BASE = "http://localhost:9783";
       const HIST = 40;
       const makeH = () => Array(HIST).fill(null);
 
@@ -201,7 +367,102 @@
         gpuH = makeH(),
         ramH = makeH(),
         ioH = makeH();
+      let processSort = "cpu";
+      let lastData = null;
+      let tickInterval = null;
 
+      // ── Settings ──────────────────────────────────────────
+      const DEFAULTS = { interval: 10000, theme: "light", wallpaper: null };
+
+      function loadSettings() {
+        return {
+          interval: parseInt(
+            localStorage.getItem("kaya_interval") || DEFAULTS.interval,
+          ),
+          theme: localStorage.getItem("kaya_theme") || DEFAULTS.theme,
+          wallpaper:
+            localStorage.getItem("kaya_wallpaper") || DEFAULTS.wallpaper,
+        };
+      }
+
+      function applySettings(settings) {
+        // Interval
+        clearInterval(tickInterval);
+        tickInterval = setInterval(tick, settings.interval);
+        document.querySelectorAll(".interval-btn").forEach((b) => {
+          b.classList.toggle(
+            "active",
+            parseInt(b.dataset.ms) === settings.interval,
+          );
+        });
+
+        // Theme
+        document.body.className = "theme-" + settings.theme;
+        document
+          .getElementById("theme-light-btn")
+          .classList.toggle("active", settings.theme === "light");
+        document
+          .getElementById("theme-dark-btn")
+          .classList.toggle("active", settings.theme === "dark");
+        document.getElementById("header-logo").src =
+          settings.theme === "dark"
+            ? "assets/brand/kaya-logo-white.svg"
+            : "assets/brand/kaya-logo-light.svg";
+
+        // Wallpaper
+        const bg = document.getElementById("bg");
+        if (settings.wallpaper) {
+          bg.style.backgroundImage = `url('${settings.wallpaper}')`;
+        } else {
+          bg.style.backgroundImage = "url('assets/wallpaper.jpg')";
+        }
+      }
+
+      function setInterval_(ms) {
+        localStorage.setItem("kaya_interval", ms);
+        applySettings(loadSettings());
+      }
+
+      function setTheme(theme) {
+        localStorage.setItem("kaya_theme", theme);
+        applySettings(loadSettings());
+      }
+
+      function uploadWallpaper(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          localStorage.setItem("kaya_wallpaper", e.target.result);
+          applySettings(loadSettings());
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function resetWallpaper() {
+        localStorage.removeItem("kaya_wallpaper");
+        applySettings(loadSettings());
+      }
+
+      function toggleSettings() {
+        document.getElementById("settings-overlay").classList.toggle("visible");
+      }
+
+      function closeSettings(event) {
+        if (event.target === document.getElementById("settings-overlay")) {
+          document
+            .getElementById("settings-overlay")
+            .classList.remove("visible");
+        }
+      }
+
+      document.querySelectorAll(".interval-btn").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          setInterval_(parseInt(btn.dataset.ms)),
+        );
+      });
+
+      // ── Charts ────────────────────────────────────────────
       const chartOpts = (color, maxY, sfx) => ({
         responsive: true,
         maintainAspectRatio: false,
@@ -251,6 +512,7 @@
       const ramChart = mkChart("ram-chart", "#059669", 100, "%");
       const diskChart = mkChart("disk-chart", "#d97706", 250, "");
 
+      // ── Helpers ───────────────────────────────────────────
       function clamp(v, lo, hi) {
         return Math.max(lo, Math.min(hi, v));
       }
@@ -294,8 +556,75 @@
         );
       }
 
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+        document
+          .querySelector(`.tab[onclick="switchTab('${tab}')"]`)
+          .classList.add("active");
+        document.getElementById("tab-" + tab).classList.add("active");
+      }
+
+      function setProcessSort(sort) {
+        processSort = sort;
+        document
+          .getElementById("sort-cpu-btn")
+          .classList.toggle("active", sort === "cpu");
+        document
+          .getElementById("sort-ram-btn")
+          .classList.toggle("active", sort === "ram");
+        if (lastData) renderProcesses(lastData.processes);
+      }
+
+      function renderDocker(containers) {
+        const tbody = document.getElementById("docker-body");
+        if (!containers || containers.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="4" class="empty-row">No containers found</td></tr>';
+          return;
+        }
+        tbody.innerHTML = containers
+          .map(
+            (c) => `
+    <tr>
+      <td class="td-name">${c.name}</td>
+      <td class="td-mono">${c.image}</td>
+      <td><span class="status-pill ${c.status}">${c.status}</span></td>
+      <td class="td-mono td-muted">${c.running_for}</td>
+    </tr>`,
+          )
+          .join("");
+      }
+
+      function renderProcesses(procs) {
+        const tbody = document.getElementById("process-body");
+        const list = processSort === "cpu" ? procs.by_cpu : procs.by_ram;
+        if (!list || list.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="empty-row">No processes found</td></tr>';
+          return;
+        }
+        tbody.innerHTML = list
+          .map(
+            (p) => `
+    <tr>
+      <td class="td-mono td-muted">${p.pid}</td>
+      <td class="td-name">${p.name}</td>
+      <td class="td-mono">${p.cpu}%</td>
+      <td class="td-mono">${p.ram_mb} MB <span class="td-muted">(${p.ram_pct}%)</span></td>
+      <td><span class="status-pill ${p.status === "running" ? "running" : "stopped"}">${p.status}</span></td>
+    </tr>`,
+          )
+          .join("");
+      }
+
       function clearDisplay() {
         document.getElementById("status-dot").className = "status-dot offline";
+        document.getElementById("dot-wrap")._tooltipText = "Not connected";
         [
           "cpu-val",
           "gpu-val",
@@ -327,7 +656,9 @@
       }
 
       function applyMetrics(d) {
+        lastData = d;
         document.getElementById("status-dot").className = "status-dot online";
+        document.getElementById("dot-wrap")._tooltipText = "Connected";
 
         const cpu = Math.round(d.cpu.percent);
         document.getElementById("cpu-val").textContent = cpu + "%";
@@ -384,6 +715,8 @@
         document.getElementById("uptime-display").textContent = fmtUptime(
           d.uptime_seconds,
         );
+        renderDocker(d.docker);
+        renderProcesses(d.processes);
       }
 
       function confirmAction(action) {
@@ -411,9 +744,7 @@
         closeModal();
         try {
           await fetch(BASE + "/api/" + action, { method: "POST" });
-        } catch {
-          // Server going down will cause a fetch error — expected
-        }
+        } catch {}
       }
 
       async function tick() {
@@ -428,8 +759,51 @@
         }
       }
 
+      // ── Floating tooltip ──────────────────────────────────
+      const ftip = document.getElementById("floating-tooltip");
+
+      function setupTooltip(wrapId, text, position) {
+        const wrap = document.getElementById(wrapId);
+        wrap.addEventListener("mouseenter", () => {
+          ftip.textContent = wrap._tooltipText || text;
+          ftip.style.display = "block";
+          const r = wrap.getBoundingClientRect();
+          if (position === "above") {
+            ftip.style.top = "";
+            ftip.style.bottom = window.innerHeight - r.top + 8 + "px";
+          } else {
+            ftip.style.bottom = "";
+            ftip.style.top = r.bottom + 8 + "px";
+          }
+          const tipW = ftip.offsetWidth;
+          let left = r.left;
+          if (left + tipW > window.innerWidth - 8)
+            left = window.innerWidth - tipW - 8;
+          ftip.style.left = left + "px";
+          ftip.style.opacity = "1";
+        });
+        wrap.addEventListener("mouseleave", () => {
+          ftip.style.opacity = "0";
+          ftip.style.display = "none";
+        });
+      }
+
+      setupTooltip("dot-wrap", "Not connected", "above");
+      setupTooltip(
+        "restart-wrap",
+        "Reboots the server. Dashboard will reconnect automatically.",
+        "below",
+      );
+      setupTooltip(
+        "shutdown-wrap",
+        "Powers off the server. Physical access needed to restart.",
+        "below",
+      );
+      document.getElementById("dot-wrap")._tooltipText = "Not connected";
+
+      // ── Boot ──────────────────────────────────────────────
+      applySettings(loadSettings());
       tick();
-      setInterval(tick, 10000);
     </script>
   </body>
 </html>

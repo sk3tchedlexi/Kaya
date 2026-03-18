@@ -2,3 +2,5 @@ fastapi
 uvicorn[standard]
 psutil
 nvidia-ml-py
+aiofiles
+python-multipart

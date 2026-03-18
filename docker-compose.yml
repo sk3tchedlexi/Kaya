@@ -1,0 +1,25 @@
+name: kaya
+services:
+  kaya:
+    image: ghcr.io/sk3tchedlexi/kaya:latest
+    container_name: kaya
+    restart: unless-stopped
+    ports:
+      - "9783:9783"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+    privileged: true
+    network_mode: host
+    labels:
+      - "com.casaos.title=Kaya"
+      - "com.casaos.description=A minimal self-hosted system dashboard"
+      - "com.casaos.port=9783"
+      - "com.casaos.scheme=http"
+      - "com.casaos.index=/"
+      - "com.casaos.icon=https://raw.githubusercontent.com/sk3tchedlexi/Kaya/main/frontend/assets/brand/kaya-icon.svg"

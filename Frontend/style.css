@@ -15,11 +15,9 @@ body {
 }
 body {
   background: #1a1a2e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
+/* ── Background ── */
 .bg {
   position: fixed;
   inset: 0;
@@ -35,17 +33,19 @@ body {
   background: rgba(245, 240, 235, 0.12);
 }
 
+/* ── Dashboard grid ── */
 .dashboard {
   position: relative;
   z-index: 2;
   width: 100vw;
   height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr 1fr auto;
+  grid-template-rows: auto 1fr;
   padding: 16px 20px 12px;
   gap: 10px;
 }
 
+/* ── Glass base ── */
 .glass {
   background: rgba(255, 252, 250, 0.38);
   backdrop-filter: blur(8px) saturate(1.5);
@@ -54,6 +54,7 @@ body {
   border-radius: 14px;
 }
 
+/* ── Header ── */
 .header {
   display: flex;
   align-items: center;
@@ -65,7 +66,69 @@ body {
   align-items: center;
   gap: 12px;
 }
+.header-right {
+  display: flex;
+  align-items: center;
+}
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(28, 24, 48, 0.12);
+}
+.uptime-label {
+  font-size: 10px;
+  color: rgba(28, 24, 48, 0.5);
+  text-align: right;
+  margin-bottom: 1px;
+}
+.uptime-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1c1830;
+  font-family: "JetBrains Mono", monospace;
+  text-align: right;
+}
+.logo {
+  height: 28px;
+  width: auto;
+}
 
+/* ── Header action buttons ── */
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.action-btn {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.action-btn:hover {
+  opacity: 0.75;
+}
+.restart-btn {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.4);
+  color: #1d4ed8;
+}
+.shutdown-btn {
+  background: rgba(185, 28, 28, 0.1);
+  border-color: rgba(185, 28, 28, 0.35);
+  color: #b91c1c;
+}
+
+/* ── Status dot ── */
 .status-dot {
   width: 8px;
   height: 8px;
@@ -95,35 +158,82 @@ body {
   }
 }
 
-.logo {
-  height: 28px;
-  width: auto;
-}
-.uptime-label {
-  font-size: 10px;
-  color: rgba(28, 24, 48, 0.5);
-  text-align: right;
-  margin-bottom: 1px;
-}
-.uptime-val {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1c1830;
-  font-family: "JetBrains Mono", monospace;
-  text-align: right;
-}
-
-.header-meta {
-  display: flex;
+/* ── Tooltips ── */
+.tooltip-wrap {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 16px;
-}
-.header-divider {
-  width: 1px;
-  height: 28px;
-  background: rgba(28, 24, 48, 0.12);
 }
 
+#floating-tooltip {
+  position: fixed;
+  display: none;
+  opacity: 0;
+  background: rgba(28, 24, 48, 0.88);
+  color: #f0eeff;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 400;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 7px;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 99999;
+}
+
+/* ── Tabs ── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-left: 16px;
+}
+.tab {
+  width: 90px;
+  height: 30px;
+  padding: 0;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 252, 250, 0.18);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(28, 24, 48, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab:hover {
+  background: rgba(255, 252, 250, 0.32);
+  color: rgba(28, 24, 48, 0.75);
+}
+.tab.active {
+  background: rgba(255, 252, 250, 0.55);
+  color: #1c1830;
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Tab content ── */
+.tab-content {
+  display: none;
+  height: 100%;
+  min-height: 0;
+}
+.tab-content.active {
+  display: grid;
+}
+
+#tab-overview {
+  grid-template-rows: 1fr 1fr auto;
+  gap: 10px;
+}
+#tab-docker,
+#tab-processes {
+  grid-template-rows: 1fr;
+}
+
+/* ── Stat cards ── */
 .stat-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -214,6 +324,7 @@ body {
   background: #d97706;
 }
 
+/* ── Charts ── */
 .chart-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -247,11 +358,11 @@ body {
   min-height: 0;
 }
 
+/* ── Temp row ── */
 .bottom-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  align-items: stretch;
 }
 .temp-card {
   padding: 10px 14px;
@@ -301,36 +412,107 @@ body {
   background: #dc2626;
 }
 
-.header-actions {
+/* ── Panel card (Docker / Processes) ── */
+.panel-card {
+  padding: 0;
+  overflow: hidden;
   display: flex;
-  gap: 8px;
-  align-items: center;
+  flex-direction: column;
+}
+.panel-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid rgba(28, 24, 48, 0.08);
+  flex-shrink: 0;
+}
+.sort-btn {
+  padding: 4px 14px;
+  border-radius: 7px;
+  border: 1px solid rgba(28, 24, 48, 0.18);
+  background: transparent;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(28, 24, 48, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sort-btn:hover {
+  background: rgba(28, 24, 48, 0.06);
+  color: rgba(28, 24, 48, 0.75);
+}
+.sort-btn.active {
+  background: rgba(28, 24, 48, 0.1);
+  color: #1c1830;
+  border-color: rgba(28, 24, 48, 0.3);
 }
 
-.action-btn {
-  padding: 5px 12px;
-  border-radius: 8px;
-  border: 1px solid;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 11px;
+/* ── Data table ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.data-table th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(28, 24, 48, 0.45);
   font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.15s;
+  border-bottom: 1px solid rgba(28, 24, 48, 0.1);
 }
-.action-btn:hover {
-  opacity: 0.75;
+.data-table td {
+  padding: 9px 16px;
+  color: #1c1830;
+  border-bottom: 1px solid rgba(28, 24, 48, 0.05);
 }
-.restart-btn {
-  background: rgba(37, 99, 235, 0.12);
-  border-color: rgba(37, 99, 235, 0.4);
-  color: #1d4ed8;
+.data-table tbody tr:last-child td {
+  border-bottom: none;
 }
-.shutdown-btn {
+.data-table tbody tr:hover td {
+  background: rgba(28, 24, 48, 0.03);
+}
+
+.td-mono {
+  font-family: "JetBrains Mono", monospace;
+}
+.td-muted {
+  color: rgba(28, 24, 48, 0.45);
+}
+.td-name {
+  font-weight: 700;
+}
+.empty-row {
+  text-align: center;
+  color: rgba(28, 24, 48, 0.35);
+  font-family: "JetBrains Mono", monospace;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: "JetBrains Mono", monospace;
+}
+.status-pill.running {
+  background: rgba(5, 150, 105, 0.12);
+  color: #047857;
+}
+.status-pill.stopped {
   background: rgba(185, 28, 28, 0.1);
-  border-color: rgba(185, 28, 28, 0.35);
   color: #b91c1c;
 }
+.status-pill.sleeping {
+  background: rgba(28, 24, 48, 0.08);
+  color: rgba(28, 24, 48, 0.5);
+}
 
+/* ── Modal ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -347,7 +529,6 @@ body {
   opacity: 1;
   pointer-events: all;
 }
-
 .modal {
   padding: 28px 32px;
   min-width: 340px;
@@ -355,27 +536,23 @@ body {
   flex-direction: column;
   gap: 12px;
 }
-
 .modal-title {
   font-size: 17px;
   font-weight: 800;
   color: #1c1830;
 }
-
 .modal-body {
   font-size: 12px;
   color: rgba(28, 24, 48, 0.65);
   font-family: "JetBrains Mono", monospace;
   line-height: 1.6;
 }
-
 .modal-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 6px;
 }
-
 .modal-btn {
   padding: 7px 18px;
   border-radius: 8px;
@@ -403,4 +580,335 @@ body {
   background: rgba(185, 28, 28, 0.1);
   border-color: rgba(185, 28, 28, 0.35);
   color: #b91c1c;
+}
+
+/* ── Cog button ── */
+.cog-icon {
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+.cog-btn:hover .cog-icon {
+  opacity: 0.75;
+}
+.cog-btn.active .cog-icon {
+  opacity: 1;
+}
+.cog-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(28, 24, 48, 0.18);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(28, 24, 48, 0.45);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.cog-btn:hover {
+  background: rgba(28, 24, 48, 0.07);
+  color: rgba(28, 24, 48, 0.75);
+}
+.cog-btn.active {
+  background: rgba(28, 24, 48, 0.1);
+  color: #1c1830;
+}
+
+/* ── Settings overlay ── */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+.settings-overlay.visible {
+  pointer-events: all;
+}
+
+.settings-panel {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 280px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
+}
+.settings-overlay.visible .settings-panel {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.settings-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1c1830;
+  letter-spacing: -0.2px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: rgba(28, 24, 48, 0.45);
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Interval buttons */
+.interval-options {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.interval-btn {
+  flex: 1;
+  min-width: 36px;
+  padding: 5px 0;
+  border-radius: 7px;
+  border: 1px solid rgba(28, 24, 48, 0.18);
+  background: transparent;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(28, 24, 48, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.interval-btn:hover {
+  background: rgba(28, 24, 48, 0.06);
+  color: rgba(28, 24, 48, 0.75);
+}
+.interval-btn.active {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.4);
+  color: #1d4ed8;
+}
+
+/* Theme buttons */
+.theme-toggle {
+  display: flex;
+  gap: 4px;
+}
+.theme-btn {
+  flex: 1;
+  padding: 6px 0;
+  border-radius: 7px;
+  border: 1px solid rgba(28, 24, 48, 0.18);
+  background: transparent;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(28, 24, 48, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.theme-btn:hover {
+  background: rgba(28, 24, 48, 0.06);
+  color: rgba(28, 24, 48, 0.75);
+}
+.theme-btn.active {
+  background: rgba(28, 24, 48, 0.1);
+  border-color: rgba(28, 24, 48, 0.3);
+  color: #1c1830;
+}
+
+/* Wallpaper */
+.wallpaper-btn {
+  display: block;
+  width: 100%;
+  padding: 6px 0;
+  border-radius: 7px;
+  border: 1px solid rgba(28, 24, 48, 0.18);
+  background: transparent;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(28, 24, 48, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.wallpaper-btn:hover {
+  background: rgba(28, 24, 48, 0.06);
+  color: rgba(28, 24, 48, 0.75);
+}
+
+.wallpaper-reset-btn {
+  display: block;
+  width: 100%;
+  padding: 6px 0;
+  border-radius: 7px;
+  border: 1px solid rgba(28, 24, 48, 0.12);
+  background: transparent;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(28, 24, 48, 0.35);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  margin-top: 4px;
+}
+.wallpaper-reset-btn:hover {
+  color: rgba(28, 24, 48, 0.6);
+  border-color: rgba(28, 24, 48, 0.2);
+}
+
+/* ── Dark theme overrides ── */
+body.theme-dark .bg-overlay {
+  background: rgba(10, 8, 20, 0.35);
+}
+
+body.theme-dark .glass {
+  background: rgba(18, 15, 32, 0.55);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.theme-dark .stat-label,
+body.theme-dark .chart-title,
+body.theme-dark .temp-label,
+body.theme-dark .uptime-label,
+body.theme-dark .settings-label {
+  color: rgba(220, 215, 255, 0.45);
+}
+
+body.theme-dark .stat-val,
+body.theme-dark .uptime-val,
+body.theme-dark .modal-title,
+body.theme-dark .settings-title {
+  color: #e8e4ff;
+}
+
+body.theme-dark .stat-sub,
+body.theme-dark .chart-cur {
+  color: rgba(220, 215, 255, 0.5);
+}
+
+body.theme-dark .data-table th {
+  color: rgba(220, 215, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+body.theme-dark .data-table td {
+  color: #ddd8ff;
+  border-color: rgba(255, 255, 255, 0.04);
+}
+body.theme-dark .data-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.theme-dark .bar-track,
+body.theme-dark .temp-bar-track,
+body.theme-dark .temp-bar-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .header-divider {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.theme-dark .tab {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(18, 15, 32, 0.35);
+  color: rgba(220, 215, 255, 0.45);
+}
+body.theme-dark .tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(220, 215, 255, 0.8);
+}
+body.theme-dark .tab.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e8e4ff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.theme-dark .action-btn.restart-btn {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93c5fd;
+}
+body.theme-dark .action-btn.shutdown-btn {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+body.theme-dark .cog-btn {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(220, 215, 255, 0.4);
+}
+body.theme-dark .cog-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(220, 215, 255, 0.8);
+}
+
+body.theme-dark .sort-btn,
+body.theme-dark .interval-btn,
+body.theme-dark .theme-btn,
+body.theme-dark .wallpaper-btn,
+body.theme-dark .wallpaper-reset-btn {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(220, 215, 255, 0.45);
+}
+body.theme-dark .sort-btn:hover,
+body.theme-dark .interval-btn:hover,
+body.theme-dark .theme-btn:hover,
+body.theme-dark .wallpaper-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(220, 215, 255, 0.8);
+}
+body.theme-dark .sort-btn.active {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93c5fd;
+}
+body.theme-dark .interval-btn.active {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93c5fd;
+}
+body.theme-dark .theme-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e8e4ff;
+}
+
+body.theme-dark .modal-body {
+  color: rgba(220, 215, 255, 0.6);
+}
+body.theme-dark .cancel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(220, 215, 255, 0.6);
+}
+
+body.theme-dark .panel-toolbar {
+  border-color: rgba(255, 255, 255, 0.07);
+}
+body.theme-dark .status-pill.sleeping {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(220, 215, 255, 0.4);
+}
+
+body.theme-dark #floating-tooltip {
+  background: rgba(220, 215, 255, 0.12);
+  color: #e8e4ff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
