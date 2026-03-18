@@ -23,14 +23,22 @@ def get_metrics():
 
 @app.post("/api/shutdown")
 def shutdown():
-    # pid:host means we share the host PID namespace — shutdown runs on the host directly
-    subprocess.Popen(["shutdown", "-h", "now"])
+    # Write to host sysrq-trigger — works from privileged container without systemd
+    try:
+        with open("/proc/sysrq-trigger", "w") as f:
+            f.write("o")
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
     return {"status": "shutting down"}
 
 
 @app.post("/api/restart")
 def restart():
-    subprocess.Popen(["shutdown", "-r", "now"])
+    try:
+        with open("/proc/sysrq-trigger", "w") as f:
+            f.write("b")
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
     return {"status": "restarting"}
 
 

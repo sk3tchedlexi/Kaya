@@ -4,26 +4,22 @@ services:
     image: ghcr.io/sk3tchedlexi/kaya:latest
     container_name: kaya
     restart: unless-stopped
-    ports:
-      - "9783:9783"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/host/root:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - HOST_PROC=/host/proc
-      - HOST_SYS=/host/sys
+    devices:
+      - /dev/nvidiactl:/dev/nvidiactl
+      - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidia-uvm:/dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
     privileged: true
     pid: host
     network_mode: host
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    environment:
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
     labels:
       - "com.casaos.title=Kaya"
       - "com.casaos.description=A minimal self-hosted system dashboard"
