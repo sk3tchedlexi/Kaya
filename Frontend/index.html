@@ -473,7 +473,7 @@
           y: {
             display: true,
             min: 0,
-            max: maxY,
+            ...(maxY !== null ? { max: maxY } : { suggestedMax: 10 }),
             grid: { color: "rgba(28,24,48,0.07)", drawBorder: false },
             ticks: {
               color: "rgba(28,24,48,0.3)",
@@ -510,7 +510,7 @@
       const cpuChart = mkChart("cpu-chart", "#2563eb", 100, "%");
       const gpuChart = mkChart("gpu-chart", "#7c3aed", 100, "%");
       const ramChart = mkChart("ram-chart", "#059669", 100, "%");
-      const diskChart = mkChart("disk-chart", "#d97706", 250, "");
+      const diskChart = mkChart("disk-chart", "#d97706", null, "");
 
       // ── Helpers ───────────────────────────────────────────
       function clamp(v, lo, hi) {
@@ -673,7 +673,8 @@
           document.getElementById("gpu-val").textContent = gpu + "%";
           document.getElementById("gpu-bar").style.width = gpu + "%";
           document.getElementById("gpu-sub").textContent =
-            "VRAM: " +
+            (d.gpu.name || "NVIDIA GPU") +
+            " — VRAM: " +
             d.gpu.vram_used_gb.toFixed(1) +
             " / " +
             d.gpu.vram_total_gb.toFixed(1) +

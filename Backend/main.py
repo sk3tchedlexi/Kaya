@@ -23,13 +23,14 @@ def get_metrics():
 
 @app.post("/api/shutdown")
 def shutdown():
-    subprocess.Popen(["nsenter", "-t", "1", "-m", "-u", "-i", "-n", "-p", "--", "shutdown", "-h", "now"])
+    # pid:host means we share the host PID namespace — shutdown runs on the host directly
+    subprocess.Popen(["shutdown", "-h", "now"])
     return {"status": "shutting down"}
 
 
 @app.post("/api/restart")
 def restart():
-    subprocess.Popen(["nsenter", "-t", "1", "-m", "-u", "-i", "-n", "-p", "--", "shutdown", "-r", "now"])
+    subprocess.Popen(["shutdown", "-r", "now"])
     return {"status": "restarting"}
 
 

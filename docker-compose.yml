@@ -15,11 +15,19 @@ services:
       - HOST_PROC=/host/proc
       - HOST_SYS=/host/sys
     privileged: true
+    pid: host
     network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     labels:
       - "com.casaos.title=Kaya"
       - "com.casaos.description=A minimal self-hosted system dashboard"
       - "com.casaos.port=9783"
       - "com.casaos.scheme=http"
       - "com.casaos.index=/"
-      - "com.casaos.icon=https://raw.githubusercontent.com/sk3tchedlexi/Kaya/main/frontend/assets/brand/kaya-icon.svg"
+      - "com.casaos.icon=https://raw.githubusercontent.com/sk3tchedlexi/Kaya/main/Frontend/assets/brand/kaya-icon.svg"

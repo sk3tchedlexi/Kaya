@@ -6,11 +6,12 @@ import time
 try:
     pynvml.nvmlInit()
     _nvml_available = True
-except pynvml.NVMLError:
+except Exception:
     _nvml_available = False
 
-_last_disk_io   = None
-_last_disk_time = None
+# Pre-seed disk I/O so first call gives a real delta not zero
+_last_disk_io   = psutil.disk_io_counters()
+_last_disk_time = time.monotonic()
 
 
 def _get_cpu() -> dict:
@@ -41,13 +42,15 @@ def _get_gpu() -> dict | None:
         util   = pynvml.nvmlDeviceGetUtilizationRates(handle)
         mem    = pynvml.nvmlDeviceGetMemoryInfo(handle)
         temp   = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+        name   = pynvml.nvmlDeviceGetName(handle)
         return {
             "percent":       float(util.gpu),
             "vram_used_gb":  round(mem.used  / 1024 ** 3, 2),
             "vram_total_gb": round(mem.total / 1024 ** 3, 2),
             "temp_c":        int(temp),
+            "name":          name if isinstance(name, str) else name.decode(),
         }
-    except pynvml.NVMLError:
+    except Exception:
         return None
 
 
@@ -67,14 +70,13 @@ def _get_disk() -> dict:
     now     = time.monotonic()
     current = psutil.disk_io_counters()
 
+    elapsed    = now - _last_disk_time
     read_mbps  = 0.0
     write_mbps = 0.0
 
-    if _last_disk_io is not None and _last_disk_time is not None:
-        elapsed = now - _last_disk_time
-        if elapsed > 0:
-            read_mbps  = round((current.read_bytes  - _last_disk_io.read_bytes)  / elapsed / 1024 ** 2, 2)
-            write_mbps = round((current.write_bytes - _last_disk_io.write_bytes) / elapsed / 1024 ** 2, 2)
+    if elapsed > 0:
+        read_mbps  = round((current.read_bytes  - _last_disk_io.read_bytes)  / elapsed / 1024 ** 2, 2)
+        write_mbps = round((current.write_bytes - _last_disk_io.write_bytes) / elapsed / 1024 ** 2, 2)
 
     _last_disk_io   = current
     _last_disk_time = now
@@ -111,7 +113,7 @@ def _get_temps() -> dict:
                     temps["cpu_c"] = int(entries[0].current)
                 break
 
-        for name in ("nct6775", "nct6779", "w83627ehf", "it8728"):
+        for name in ("nct6775", "nct6779", "nct6776", "w83627ehf", "it8728"):
             if name in sensors:
                 match = next((e for e in sensors[name] if "SYSTIN" in e.label or "SYS" in e.label), None)
                 if match:
@@ -124,14 +126,14 @@ def _get_temps() -> dict:
                     temps["nvme_c"] = int(entries[0].current)
                 break
 
-    except (AttributeError, Exception):
+    except Exception:
         pass
 
     if _nvml_available:
         try:
             handle = pynvml.nvmlDeviceGetHandleByIndex(0)
             temps["gpu_c"] = int(pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU))
-        except pynvml.NVMLError:
+        except Exception:
             pass
 
     return temps
@@ -168,8 +170,8 @@ def _get_docker() -> list:
 
 
 def _get_processes() -> dict:
-    procs      = []
-    total_ram  = psutil.virtual_memory().total
+    procs     = []
+    total_ram = psutil.virtual_memory().total
 
     for p in psutil.process_iter(["pid", "name", "cpu_percent", "memory_info", "status"]):
         try:
@@ -194,7 +196,6 @@ def _get_processes() -> dict:
 
 
 def collect() -> dict:
-    """Return a full system snapshot as a dictionary."""
     return {
         "cpu":            _get_cpu(),
         "gpu":            _get_gpu(),
